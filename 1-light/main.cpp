@@ -38,7 +38,6 @@ const glm::vec3 ROTATION_AXIS = glm::vec3(0.5f, 1.0f, 0.0f);
 // Constantes del color de fondo
 const glm::vec4 CLEAR_COLOR = glm::vec4(0.2f, 0.48f, 0.72f, 1.0f);  // #337ab7 (Azul)
 
-// Constantes de geometría
 const float CUBE[] = {
     // Cara trasera
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,

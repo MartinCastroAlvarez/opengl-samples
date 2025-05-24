@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Nombre del proyecto.
-project(PhongBlinnViewSpace)
+project(MyProgram)
 
 # Configurar el estándar de C++ a usar.
 set(CMAKE_CXX_STANDARD 17)
@@ -23,10 +23,10 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
 # Define el nombre del archivo principal del programa.
-add_executable(PhongBlinnViewSpace main.cpp)
+add_executable(MyProgram main.cpp)
 
 # Enlaza las bibliotecas necesarias al ejecutable.
-target_link_libraries(PhongBlinnViewSpace
+target_link_libraries(MyProgram
     OpenGL::GL
     GLEW::GLEW
     glfw

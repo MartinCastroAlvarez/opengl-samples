@@ -10,14 +10,14 @@ Posee tres componentes:
 * `diffuse`: luz difusa que depende del ángulo de incidencia y la superficie.
 * `specular`: A diferencia del modelo `Phong`, el modelo `Phong-Blinn` muestra brillo reflejado por algunas superficies, como superficies pulidas.
 
+Los `shaders` son programas que corren en la GPU y se usan en gráficos por computadora para controlar cómo se dibujan los objetos en pantalla.
+
 ## Estructura
 
 - `main.cpp`: Archivo principal del programa 
 - `shaders/phong-blinn.vert`: Transforma la posición del un a view space.
 - `shaders/phong-blinn.frag`: Aplica los tipos de luz del modelo `Phong-Blinn` al objeto.
 - `CMakeLists.txt`: Archivo de configuración del proyecto, utilizado por `CMake` al compilar.
-
-Los `shaders` son programas que corren en la GPU y se usan en gráficos por computadora para controlar cómo se dibujan los objetos en pantalla.
 
 ## Problema
 
@@ -59,5 +59,5 @@ make
 
 Una vez compilado, ejecutar el programa:
 ```bash
-./PhongBlinnViewSpace
+./MyProgram
 ```
