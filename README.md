@@ -21,6 +21,9 @@ Para la entrega se recomienda realizar un `tag` sobre el repositorio en *GitHub*
 ![./2-camera/camera.gif](./2-camera/camera.gif)
 
 * [03](./3-lantern/) - Implementar un nuevo tipo de luz, FlashLight o Linterna, que funcione como una SpotLight (conos suavizados), pero que se mueva con la cámara y siempre ilumine hacia adelante. Como si el personaje de un juego llevara una linterna siempre apuntando hacia adelante.
+
+![3-lantern/lantern.gif](./3-lantern/lantern.gif)
+
 * [04](./4-model/) - Importar un modelo 3D complejo a elección (de algún repositorio de modelos 3D gratis). El modelo tiene que tener lo necesario para pintarlo correctamente. Para pintar hay que usar usando `normal mapping` con el modelo de iluminación `Blinn`, mapas difusos y `speculares`, y usar al menos una luz direccional, y una point light.
 * [05](./5-scene/) - Usando una escena 3D cualquiera, pintarla de manera normal desde el punto de vista de una cámara. Pero poner un panel en una esquina de la escena mostrando la misma escena desde el punto de vista de otra cámara fija, usando un `framebuffer` para ello.
 
@@ -30,5 +33,5 @@ Simplemente, en cualquiera de las carpetas, ejecutar:
 
 ```bash
 cd build/
-rm -rf * && cmake .. && make && ./MyProgram
+clear; rm -rf * && cmake .. && make && ./MyProgram
 ```
