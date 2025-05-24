@@ -5,6 +5,7 @@ Examples using OpenGL
 ## Referencias
 
 - [Notas de Clase](https://github.com/vany-viu/03_60GIIN)
+- [3D Models](https://www.cgtrader.com/free-3d-models/interior/other/egyptian-pharaonic-sculpture)
 
 ## Problema
 
@@ -25,6 +26,9 @@ Para la entrega se recomienda realizar un `tag` sobre el repositorio en *GitHub*
 ![3-lantern/lantern.gif](./3-lantern/lantern.gif)
 
 * [04](./4-model/) - Importar un modelo 3D complejo a elección (de algún repositorio de modelos 3D gratis). El modelo tiene que tener lo necesario para pintarlo correctamente. Para pintar hay que usar usando `normal mapping` con el modelo de iluminación `Blinn`, mapas difusos y `speculares`, y usar al menos una luz direccional, y una point light.
+
+![4-model/horus.gif](./4-model/horus.gif)
+
 * [05](./5-scene/) - Usando una escena 3D cualquiera, pintarla de manera normal desde el punto de vista de una cámara. Pero poner un panel en una esquina de la escena mostrando la misma escena desde el punto de vista de otra cámara fija, usando un `framebuffer` para ello.
 
 ## Instrucciones
