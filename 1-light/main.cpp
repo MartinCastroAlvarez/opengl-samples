@@ -38,6 +38,89 @@ const glm::vec3 ROTATION_AXIS = glm::vec3(0.5f, 1.0f, 0.0f);
 // Constantes del color de fondo
 const glm::vec4 CLEAR_COLOR = glm::vec4(0.2f, 0.48f, 0.72f, 1.0f);  // #337ab7 (Azul)
 
+// Constantes de geometría
+const float CUBE[] = {
+    // Cara trasera
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+    // Cara delantera
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+    // Cara izquierda
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+    // Cara derecha
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+    // Cara inferior
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+    // Cara superior
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+};
+
+// Un cono simple con base circular y punta
+const float CONE[] = {
+    // Base del cono (triángulos que forman un círculo)
+    0.0f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f,  // Centro de la base
+    0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f,  // Punto en el borde
+    0.0f, -0.5f, 0.5f,  0.0f, -1.0f, 0.0f,  // Otro punto en el borde
+
+    // Lados del cono (triángulos que van desde la base hasta la punta)
+    0.0f, 0.5f, 0.0f,  0.0f, 0.5f, 0.5f,    // Punta del cono
+    0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f,  // Punto en la base
+    0.0f, -0.5f, 0.5f,  0.0f, -1.0f, 0.0f,  // Otro punto en la base
+};
+
+// Un cilindro simple con tapas circulares
+const float CYLINDER[] = {
+    // Tapa superior
+    0.0f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,    // Centro de la tapa superior
+    0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f,    // Punto en el borde
+    0.0f, 0.5f, 0.5f,  0.0f, 1.0f, 0.0f,    // Otro punto en el borde
+
+    // Tapa inferior
+    0.0f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f,  // Centro de la tapa inferior
+    0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f,  // Punto en el borde
+    0.0f, -0.5f, 0.5f,  0.0f, -1.0f, 0.0f,  // Otro punto en el borde
+
+    // Lado del cilindro (rectángulo)
+    0.5f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f,    // Esquina superior derecha
+    0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // Esquina inferior derecha
+    0.0f, 0.5f, 0.5f,  0.0f, 0.0f, 1.0f,    // Esquina superior izquierda
+    0.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,   // Esquina inferior izquierda
+};
+
 // Función para cargar el código de un shader desde un archivo.
 std::string load(const char* filePath) {
     std::string shaderCode;
@@ -146,66 +229,32 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // Define un objeto a partir de sus vértices/puntos.
-    float vertices[] = {
-        // Cara trasera
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-        // Cara delantera
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-        // Cara izquierda
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-        // Cara derecha
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-        // Cara inferior
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-        // Cara superior
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-    };
-
     // Crea un VAO y un VBO, que son objetos que se utilizan para almacenar los datos de los vértices.
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
+    // Define el objeto a renderizar.
+    const float* vertices = CUBE;
+    // const float* vertices = CONE;
+    // const float* vertices = CYLINDER;
+
     // Vincula el VBO al VAO.
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+    // Usar el tamaño correcto según la figura seleccionada
+    int verticesCount = 0;
+    if (vertices == CUBE) {
+        glBufferData(GL_ARRAY_BUFFER, sizeof(CUBE), CUBE, GL_STATIC_DRAW);
+        verticesCount = sizeof(CUBE) / (6 * sizeof(float));
+    } else if (vertices == CONE) {
+        glBufferData(GL_ARRAY_BUFFER, sizeof(CONE), CONE, GL_STATIC_DRAW);
+        verticesCount = sizeof(CONE) / (6 * sizeof(float));
+    } else if (vertices == CYLINDER) {
+        glBufferData(GL_ARRAY_BUFFER, sizeof(CYLINDER), CYLINDER, GL_STATIC_DRAW);
+        verticesCount = sizeof(CYLINDER) / (6 * sizeof(float));
+    } 
 
     // Configura los atributos de los vértices.
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -251,7 +300,7 @@ int main() {
 
         // Renderiza el objeto.
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, verticesCount);
 
         // Intercambia los buffers de color y profundidad.
         glfwSwapBuffers(window);
