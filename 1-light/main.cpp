@@ -213,7 +213,7 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // Bucle principal de renderizado
+    // Bucle principal de renderizado, mientras no se cierra la ventana.
     while (!glfwWindowShouldClose(window)) {
 
         // Cuando se presiona una tecla, se maneja la entrada del teclado.
