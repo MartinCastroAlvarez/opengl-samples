@@ -27,16 +27,17 @@ const glm::vec3 PRIMARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
 const float PRIMARY_FOV = 75.0f; // Ángulo de visión
 const float PRIMARY_NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
 const float PRIMARY_FAR_PLANE = 100.0f; // Distancia máxima de visualización
-const glm::vec3 SECONDARY_CAMERA_POS = glm::vec3(-0.5f, -2.0f, -2.0f);  // más alejado e inclinado
-const glm::vec3 SECONDARY_CAMERA_TARGET = glm::vec3(0.0f, 0.0f, 0.0f);
-const glm::vec3 SECONDARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
-const float SECONDARY_FOV = 75.0f; // Ángulo de visión
-const float SECONDARY_NEAR_PLANE = 0.3f;  // Distancia mínima de visualización
+const glm::vec3 SECONDARY_CAMERA_POS = glm::vec3(-2.5f, 2.0f, 2.5f);
+const glm::vec3 SECONDARY_CAMERA_TARGET = glm::vec3(1.0f, 1.0f, 1.0f);
+const glm::vec3 SECONDARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 1.0f);
+const float SECONDARY_FOV = 110.0f; // Ángulo de visión
+const float SECONDARY_NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
 const float SECONDARY_FAR_PLANE = 100.0f; // Distancia máxima de visualización
 
 // Constantes de la luz
-const glm::vec3 LIGHT_POSITION = glm::vec3(2.0f, 4.0f, 2.0f);
-const glm::vec3 LIGHT_COLOR = glm::vec3(1.0f, 1.0f, 1.0f);
+const glm::vec3 LIGHT_COLOR = glm::vec3(1.0f, 0.6f, 0.6f);
+const float INNER_CUTOFF = glm::cos(glm::radians(55.0f));
+const float OUTER_CUTOFF = glm::cos(glm::radians(85.0f));
 
 // Colores de los objetos
 const glm::vec3 CUBE_COLOR = glm::vec3(1.0f, 0.5f, 0.2f);  // Taronja
@@ -45,10 +46,6 @@ const glm::vec3 PRISM_COLOR = glm::vec3(0.0f, 0.0f, 1.0f);  // Azul
 
 // Constantes del color de fondo
 const glm::vec4 CLEAR_COLOR = glm::vec4(0.15f, 0.15f, 0.18f, 1.0f);  // Gris oscuro
-
-// COnstantes de la linterna.
-const float INNER_CUTOFF = glm::cos(glm::radians(35.0f));
-const float OUTER_CUTOFF = glm::cos(glm::radians(45.0f));
 
 // Constantes de la cámara
 const float CAMERA_HEIGHT = 5.0f;
@@ -276,21 +273,20 @@ int main() {
     // Crea un quad para el framebuffer.
     // El quad es un cuadrado que se utiliza para dibujar el framebuffer flotante en la ventana.
     float quadVertices[] = {
-        0.5f, -0.5f,       0.0f, 1.0f,   // top-left
-        1.0f, -0.5f,       1.0f, 1.0f,   // top-right
-        1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
-
-        0.5f, -0.5f,       0.0f, 1.0f,   // top-left
-        1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
-        0.5f, -1.0f,       0.0f, 0.0f    // bottom-left
-    };
+        0.6f, -0.6f,  0.0f, 1.0f,
+        0.95f, -0.6f, 1.0f, 1.0f,
+        0.95f, -0.95f, 1.0f, 0.0f,
+        0.6f, -0.6f,  0.0f, 1.0f,
+        0.95f, -0.95f, 1.0f, 0.0f,
+        0.6f, -0.95f, 0.0f, 0.0f
+    }; 
 
     // Array de vértices para el borde blanco del quad
     float quadBorderVertices[] = {
-        0.5f, -0.5f,  1.0f, -0.5f,
-        1.0f, -0.5f,  1.0f, -1.0f,
-        1.0f, -1.0f,  0.5f, -1.0f,
-        0.5f, -1.0f,  0.5f, -0.5f
+        0.6f, -0.6f,   0.95f, -0.6f,
+        0.95f, -0.6f,  0.95f, -0.95f,
+        0.95f, -0.95f, 0.6f, -0.95f,
+        0.6f, -0.95f,  0.6f, -0.6f
     };
 
     // Define el VAO y VBO de la camara secundaria.
