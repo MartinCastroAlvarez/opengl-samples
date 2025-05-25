@@ -357,19 +357,19 @@ int main() {
             {PRISM, sizeof(PRISM)/(6*sizeof(float)), glm::vec3(-2.0f, 0.0f, 0.0f), PRISM_COLOR}
         };
 
-        // Calcula la matriz de vista y proyección de la camara primaria
-        glUseProgram(shaderProgram);
-        glm::mat4 altView = glm::lookAt(PRIMARY_CAMERA_POS, PRIMARY_CAMERA_TARGET, PRIMARY_CAMERA_UP);
-        glm::mat4 altProj = glm::perspective(glm::radians(PRIMARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, PRIMARY_NEAR_PLANE, PRIMARY_FAR_PLANE);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(altView));
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(altProj));
-
-        // Cambia al framebuffer de la camara secundaria
+        // Renderiza los objetos con la camara secundaria, en el framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glEnable(GL_DEPTH_TEST);
         glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Calcula la matriz de vista y proyección de la camara secundaria
+        glUseProgram(shaderProgram);
+        glm::mat4 secView = glm::lookAt(SECONDARY_CAMERA_POS, SECONDARY_CAMERA_TARGET, SECONDARY_CAMERA_UP);
+        glm::mat4 secProj = glm::perspective(glm::radians(SECONDARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, SECONDARY_NEAR_PLANE, SECONDARY_FAR_PLANE);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(secView));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(secProj));
 
         // Renderiza los objetos con la camara secundaria, en el framebuffer
         for (int i = 0; i < 3; ++i) {
@@ -381,29 +381,29 @@ int main() {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), shapes[i].pos + glm::vec3(0.0f, jump, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(glm::vec3(0.0f)));
-            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(altView * glm::vec4(PRIMARY_CAMERA_TARGET - PRIMARY_CAMERA_POS, 0.0)))));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(secView * glm::vec4(SECONDARY_CAMERA_TARGET - SECONDARY_CAMERA_POS, 0.0)))));
             glUniform1f(glGetUniformLocation(shaderProgram, "innerCutoff"), INNER_CUTOFF);
             glUniform1f(glGetUniformLocation(shaderProgram, "outerCutoff"), OUTER_CUTOFF);
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, glm::value_ptr(LIGHT_COLOR));
             glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(shapes[i].color));
-            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(PRIMARY_CAMERA_POS));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(SECONDARY_CAMERA_POS));
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, shapes[i].count);
         }
 
-        // Calcula la matriz de vista y proyección de la camara secundaria
-        glm::mat4 view = glm::lookAt(SECONDARY_CAMERA_POS, SECONDARY_CAMERA_TARGET, SECONDARY_CAMERA_UP);
-        glm::mat4 projection = glm::perspective(glm::radians(SECONDARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, SECONDARY_NEAR_PLANE, SECONDARY_FAR_PLANE);
-        glUseProgram(shaderProgram);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-        // Conecta el viewport a la camara primaria
+        // --- RENDER CAMARA PRIMARIA EN PANTALLA ---
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glEnable(GL_DEPTH_TEST);
         glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Calcula la matriz de vista y proyección de la camara primaria
+        glUseProgram(shaderProgram);
+        glm::mat4 primView = glm::lookAt(PRIMARY_CAMERA_POS, PRIMARY_CAMERA_TARGET, PRIMARY_CAMERA_UP);
+        glm::mat4 primProj = glm::perspective(glm::radians(PRIMARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, PRIMARY_NEAR_PLANE, PRIMARY_FAR_PLANE);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(primView));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(primProj));
 
         // Renderiza los objetos con la camara primaria
         for (int i = 0; i < 3; ++i) {
@@ -415,12 +415,10 @@ int main() {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), shapes[i].pos + glm::vec3(0.0f, jump, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(glm::vec3(0.0f)));
-            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(view * glm::vec4(SECONDARY_CAMERA_TARGET - SECONDARY_CAMERA_POS, 0.0)))));
-            glUniform1f(glGetUniformLocation(shaderProgram, "innerCutoff"), INNER_CUTOFF);
-            glUniform1f(glGetUniformLocation(shaderProgram, "outerCutoff"), OUTER_CUTOFF);
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(primView * glm::vec4(PRIMARY_CAMERA_TARGET - PRIMARY_CAMERA_POS, 0.0)))));
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, glm::value_ptr(LIGHT_COLOR));
             glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(shapes[i].color));
-            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(SECONDARY_CAMERA_POS));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(PRIMARY_CAMERA_POS));
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, shapes[i].count);
         }
@@ -430,6 +428,7 @@ int main() {
         glUseProgram(screenShaderProgram);
         glDisable(GL_DEPTH_TEST);
         glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, fboTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Intercambia los buffers y actualiza la ventana
