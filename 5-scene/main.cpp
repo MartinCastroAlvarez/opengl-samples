@@ -263,15 +263,51 @@ int main() {
     // Conecta el framebuffer a la ventana
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // Crea un quad para el framebuffer.
+    // El quad es un cuadrado que se utiliza para dibujar el framebuffer flotante en la ventana.
+    float quadVertices[] = {
+        // posiciones   // texCoords
+        0.6f, -0.6f,    1.0f, 0.0f,
+        1.0f, -0.6f,    0.0f, 0.0f,
+        1.0f, -1.0f,    0.0f, 1.0f,
+        0.6f, -0.6f,    1.0f, 0.0f,
+        1.0f, -1.0f,    0.0f, 1.0f,
+        0.6f, -1.0f,    1.0f, 1.0f
+    };
+
+    // Define otro VAO y VBO para el quad.
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+    // Configura los atributos de los vértices del quad.
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    // Carga los shaders para el quad.
+    std::string screenVert = load("shaders/framebuffer.vert");
+    std::string screenFrag = load("shaders/framebuffer.frag");
+    unsigned int screenVShader = compile(screenVert.c_str(), GL_VERTEX_SHADER);
+    unsigned int screenFShader = compile(screenFrag.c_str(), GL_FRAGMENT_SHADER);
+    unsigned int screenShaderProgram = glCreateProgram();
+    glAttachShader(screenShaderProgram, screenVShader);
+    glAttachShader(screenShaderProgram, screenFShader);
+    glLinkProgram(screenShaderProgram);
+    glDeleteShader(screenVShader);
+    glDeleteShader(screenFShader);
+
     // Establece el callback para el cambio de tamano de la ventana.
     glfwSetFramebufferSizeCallback(window, onResize);
 
-    // Carga el archivo .vert contiene el código del shader de vértices que se encarga de transformar los puntos al view space.
+    // Carga los shaders para los objetos.
     std::string vertexCode = load("shaders/phong-blinn.vert");
-    unsigned int vertexShader = compile(vertexCode.c_str(), GL_VERTEX_SHADER);
-
-    // Carga el archivo .frag contiene el código del shader de fragmentos que se encarga de pintar el objeto.
     std::string fragmentCode = load("shaders/phong-blinn.frag");
+    unsigned int vertexShader = compile(vertexCode.c_str(), GL_VERTEX_SHADER);
     unsigned int fragmentShader = compile(fragmentCode.c_str(), GL_FRAGMENT_SHADER);
 
     // Enlaza el programa con los shadres.
@@ -286,8 +322,6 @@ int main() {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
-
-    // Limpia los shaders de la memoria luego de enlazarse al programa.
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
@@ -327,7 +361,6 @@ int main() {
         glUseProgram(shaderProgram);
 
         // Cámara girando alrededor del centro
-        float time = glfwGetTime();
         glm::vec3 cameraPos = glm::vec3(0.0f, CAMERA_HEIGHT, CAMERA_RADIUS);
         glm::mat4 view = glm::lookAt(cameraPos, CAMERA_TARGET, CAMERA_UP);
         glm::mat4 projection = glm::perspective(glm::radians(FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, NEAR_PLANE, FAR_PLANE);
@@ -355,6 +388,7 @@ int main() {
             // Aplicar la transformación del objeto. Se mueve con un salto sinusoidal.
             glm::mat4 model = glm::mat4(1.0f);
             float phase = i * 1.5f;
+            float time = glfwGetTime();
             float speed = 1.0f + 0.5f * i;
             float jump = 0.5f * fabs(sin(time * speed + phase));
             glm::vec3 pos = shapes[i].pos + glm::vec3(0.0f, jump, 0.0f);
