@@ -27,11 +27,11 @@ const glm::vec3 PRIMARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
 const float PRIMARY_FOV = 75.0f; // Ángulo de visión
 const float PRIMARY_NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
 const float PRIMARY_FAR_PLANE = 100.0f; // Distancia máxima de visualización
-const glm::vec3 SECONDARY_CAMERA_POS = glm::vec3(0.0f, -3.0f, -4.0f);  // más alejado e inclinado
+const glm::vec3 SECONDARY_CAMERA_POS = glm::vec3(-0.5f, -2.0f, -2.0f);  // más alejado e inclinado
 const glm::vec3 SECONDARY_CAMERA_TARGET = glm::vec3(0.0f, 0.0f, 0.0f);
 const glm::vec3 SECONDARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
 const float SECONDARY_FOV = 75.0f; // Ángulo de visión
-const float SECONDARY_NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
+const float SECONDARY_NEAR_PLANE = 0.3f;  // Distancia mínima de visualización
 const float SECONDARY_FAR_PLANE = 100.0f; // Distancia máxima de visualización
 
 // Constantes de la luz
@@ -276,14 +276,21 @@ int main() {
     // Crea un quad para el framebuffer.
     // El quad es un cuadrado que se utiliza para dibujar el framebuffer flotante en la ventana.
     float quadVertices[] = {
-        // NDC positions    // TexCoords
-         0.5f, -0.5f,       0.0f, 1.0f,   // top-left
-         1.0f, -0.5f,       1.0f, 1.0f,   // top-right
-         1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
+        0.5f, -0.5f,       0.0f, 1.0f,   // top-left
+        1.0f, -0.5f,       1.0f, 1.0f,   // top-right
+        1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
 
-         0.5f, -0.5f,       0.0f, 1.0f,   // top-left
-         1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
-         0.5f, -1.0f,       0.0f, 0.0f    // bottom-left
+        0.5f, -0.5f,       0.0f, 1.0f,   // top-left
+        1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
+        0.5f, -1.0f,       0.0f, 0.0f    // bottom-left
+    };
+
+    // Array de vértices para el borde blanco del quad
+    float quadBorderVertices[] = {
+        0.5f, -0.5f,  1.0f, -0.5f,
+        1.0f, -0.5f,  1.0f, -1.0f,
+        1.0f, -1.0f,  0.5f, -1.0f,
+        0.5f, -1.0f,  0.5f, -0.5f
     };
 
     // Define el VAO y VBO de la camara secundaria.
@@ -298,6 +305,16 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+    // VAO y VBO para el borde del quad
+    unsigned int quadBorderVAO, quadBorderVBO;
+    glGenVertexArrays(1, &quadBorderVAO);
+    glGenBuffers(1, &quadBorderVBO);
+    glBindVertexArray(quadBorderVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadBorderVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadBorderVertices), quadBorderVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
     // Carga los shaders para el quad, de la camara secundaria.
     std::string screenVert = load("shaders/framebuffer.vert");
     std::string screenFrag = load("shaders/framebuffer.frag");
@@ -309,6 +326,18 @@ int main() {
     glLinkProgram(screenShaderProgram);
     glDeleteShader(screenVShader);
     glDeleteShader(screenFShader);
+
+    // Carga los shaders para el borde blanco
+    std::string borderVert = load("shaders/border.vert");
+    std::string borderFrag = load("shaders/border.frag");
+    unsigned int borderVShader = compile(borderVert.c_str(), GL_VERTEX_SHADER);
+    unsigned int borderFShader = compile(borderFrag.c_str(), GL_FRAGMENT_SHADER);
+    unsigned int borderShaderProgram = glCreateProgram();
+    glAttachShader(borderShaderProgram, borderVShader);
+    glAttachShader(borderShaderProgram, borderFShader);
+    glLinkProgram(borderShaderProgram);
+    glDeleteShader(borderVShader);
+    glDeleteShader(borderFShader);
 
     // Define el VAO y VBO de la camara primaria
     unsigned int VBO, VAO;
@@ -350,6 +379,10 @@ int main() {
         // Obtiene el tiempo actual utiizando GLFW
         float time = glfwGetTime();
 
+        // Obtiene el tamaño real del framebuffer
+        int fbw, fbh;
+        glfwGetFramebufferSize(window, &fbw, &fbh);
+
         // Define los 3 modelos a dibujar.
         ShapeInfo shapes[3] = {
             {CUBE, sizeof(CUBE)/(6*sizeof(float)), glm::vec3(0.0f, 0.0f, 0.0f), CUBE_COLOR},
@@ -359,7 +392,7 @@ int main() {
 
         // Renderiza los objetos con la camara secundaria, en el framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glViewport(0, 0, fbw, fbh);
         glEnable(GL_DEPTH_TEST);
         glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -367,7 +400,7 @@ int main() {
         // Calcula la matriz de vista y proyección de la camara secundaria
         glUseProgram(shaderProgram);
         glm::mat4 secView = glm::lookAt(SECONDARY_CAMERA_POS, SECONDARY_CAMERA_TARGET, SECONDARY_CAMERA_UP);
-        glm::mat4 secProj = glm::perspective(glm::radians(SECONDARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, SECONDARY_NEAR_PLANE, SECONDARY_FAR_PLANE);
+        glm::mat4 secProj = glm::perspective(glm::radians(SECONDARY_FOV), (float)fbw / (float)fbh, SECONDARY_NEAR_PLANE, SECONDARY_FAR_PLANE);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(secView));
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(secProj));
 
@@ -391,9 +424,9 @@ int main() {
             glDrawArrays(GL_TRIANGLES, 0, shapes[i].count);
         }
 
-        // --- RENDER CAMARA PRIMARIA EN PANTALLA ---
+        // Renderiza los objetos con la camara primaria
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glViewport(0, 0, fbw, fbh);
         glEnable(GL_DEPTH_TEST);
         glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -401,7 +434,7 @@ int main() {
         // Calcula la matriz de vista y proyección de la camara primaria
         glUseProgram(shaderProgram);
         glm::mat4 primView = glm::lookAt(PRIMARY_CAMERA_POS, PRIMARY_CAMERA_TARGET, PRIMARY_CAMERA_UP);
-        glm::mat4 primProj = glm::perspective(glm::radians(PRIMARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, PRIMARY_NEAR_PLANE, PRIMARY_FAR_PLANE);
+        glm::mat4 primProj = glm::perspective(glm::radians(PRIMARY_FOV), (float)fbw / (float)fbh, PRIMARY_NEAR_PLANE, PRIMARY_FAR_PLANE);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(primView));
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(primProj));
 
@@ -416,6 +449,8 @@ int main() {
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(glm::vec3(0.0f)));
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(primView * glm::vec4(PRIMARY_CAMERA_TARGET - PRIMARY_CAMERA_POS, 0.0)))));
+            glUniform1f(glGetUniformLocation(shaderProgram, "innerCutoff"), INNER_CUTOFF);
+            glUniform1f(glGetUniformLocation(shaderProgram, "outerCutoff"), OUTER_CUTOFF);
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, glm::value_ptr(LIGHT_COLOR));
             glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(shapes[i].color));
             glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(PRIMARY_CAMERA_POS));
@@ -424,12 +459,17 @@ int main() {
         }
 
         // Dibuja el quad con la textura del framebuffer
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glViewport(0, 0, fbw, fbh);
         glUseProgram(screenShaderProgram);
         glDisable(GL_DEPTH_TEST);
         glBindVertexArray(quadVAO);
         glBindTexture(GL_TEXTURE_2D, fboTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // Dibuja el borde blanco alrededor del quad
+        glUseProgram(borderShaderProgram);
+        glBindVertexArray(quadBorderVAO);
+        glDrawArrays(GL_LINES, 0, 8);
 
         // Intercambia los buffers y actualiza la ventana
         glfwSwapBuffers(window);
