@@ -1,6 +1,6 @@
 # Frame Buffer Window
 
-![scene.gif](scene.gif)
+![cameras.gif](cameras.gif)
 
 TODO
 
@@ -11,6 +11,8 @@ TODO
 - `shaders/phong-blinn.frag`: Aplica el modelo de iluminación Phong-Blinn a los objetos de la escena.
 - `shaders/framebuffer.vert`: Shader para el quad que muestra la vista secundaria, transforma las coordenadas de textura.
 - `shaders/framebuffer.frag`: Shader que muestra la textura del framebuffer en el quad de la vista secundaria.
+- `shaders/border.vert`: Shader para el border blanco del framebuffer.
+- `shaders/border.frag`: Shader para colorear el border de color Blanco.
 - `CMakeLists.txt`: Archivo de configuración del proyecto, utilizado por CMake al compilar.
 
 ## Instrucciones

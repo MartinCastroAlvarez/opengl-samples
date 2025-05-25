@@ -33,11 +33,4 @@ Para la entrega se recomienda realizar un `tag` sobre el repositorio en *GitHub*
 
 * [05](./5-scene/) - Usando una escena 3D cualquiera, pintarla de manera normal desde el punto de vista de una cámara. Pero poner un panel en una esquina de la escena mostrando la misma escena desde el punto de vista de otra cámara fija, usando un `framebuffer` para ello.
 
-## Instrucciones
-
-Simplemente, en cualquiera de las carpetas, ejecutar:
-
-```bash
-cd build/
-clear; rm -rf * && cmake .. && make && ./MyProgram
-```
+![5-scene/cameras.gif](./5-scene/cameras.gif)
