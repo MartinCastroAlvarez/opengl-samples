@@ -6,7 +6,7 @@ En gráficos 3D, la cámara no existe físicamente como un objeto: es una matriz
 
 La función `LookAt(eye, center, up)` genera una `view matrix` que transforma todo el mundo 3D al `view space`. En otras palabras, reposiciona y reorienta todos los objetos como si estuviéramos mirando desde una cámara virtual ubicada en eye, mirando hacia center, y con una orientación vertical dada por el vector up.
 
-Internamente, LookAt construye un sistema de coordenadas local partir de tres vectores:
+Internamente, `LookAt` construye un sistema de coordenadas local partir de tres vectores:
 
 - `f (forward)`: dirección desde `eye` hacia `center`
 - `r (right)`: vector perpendicular a `f` y `up`, que apunta hacia la derecha
