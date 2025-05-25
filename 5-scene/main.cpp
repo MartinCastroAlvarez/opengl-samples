@@ -20,12 +20,19 @@ const char* WINDOW_TITLE = "Multiple Cameras";
 const int GL_VERSION_MAJOR = 3;
 const int GL_VERSION_MINOR = 3;
 
-// Constantes de la cámara
-const glm::vec3 CAMERA_TARGET = glm::vec3(0.0f, 0.0f, 0.0f);
-const glm::vec3 CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
-const float FOV = 45.0f; // Ángulo de visión
-const float NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
-const float FAR_PLANE = 100.0f; // Distancia máxima de visualización
+// Constantes de las cámaras
+const glm::vec3 PRIMARY_CAMERA_POS = glm::vec3(0.0f, 0.5f, 2.5f); // Más cerca y centrada en Y
+const glm::vec3 PRIMARY_CAMERA_TARGET = glm::vec3(0.0f, 0.0f, 0.0f);
+const glm::vec3 PRIMARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
+const float PRIMARY_FOV = 75.0f; // Ángulo de visión
+const float PRIMARY_NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
+const float PRIMARY_FAR_PLANE = 100.0f; // Distancia máxima de visualización
+const glm::vec3 SECONDARY_CAMERA_POS = glm::vec3(0.0f, -3.0f, -4.0f);  // más alejado e inclinado
+const glm::vec3 SECONDARY_CAMERA_TARGET = glm::vec3(0.0f, 0.0f, 0.0f);
+const glm::vec3 SECONDARY_CAMERA_UP = glm::vec3(0.0f, 1.0f, 0.0f);
+const float SECONDARY_FOV = 75.0f; // Ángulo de visión
+const float SECONDARY_NEAR_PLANE = 0.1f;  // Distancia mínima de visualización
+const float SECONDARY_FAR_PLANE = 100.0f; // Distancia máxima de visualización
 
 // Constantes de la luz
 const glm::vec3 LIGHT_POSITION = glm::vec3(2.0f, 4.0f, 2.0f);
@@ -39,9 +46,13 @@ const glm::vec3 PRISM_COLOR = glm::vec3(0.0f, 0.0f, 1.0f);  // Azul
 // Constantes del color de fondo
 const glm::vec4 CLEAR_COLOR = glm::vec4(0.15f, 0.15f, 0.18f, 1.0f);  // Gris oscuro
 
+// COnstantes de la linterna.
+const float INNER_CUTOFF = glm::cos(glm::radians(35.0f));
+const float OUTER_CUTOFF = glm::cos(glm::radians(45.0f));
+
 // Constantes de la cámara
-const float CAMERA_HEIGHT = 2.0f;
-const float CAMERA_RADIUS = 4.0f;
+const float CAMERA_HEIGHT = 5.0f;
+const float CAMERA_RADIUS = 14.0f;
 
 const float CUBE[] = {
     // Cara trasera
@@ -237,12 +248,10 @@ int main() {
         return -1;
     }
 
-    // Inicializa framebuffer
+    // Inicializa framebuffer de la camara secundaria
     unsigned int fbo;
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    // Crea textura para el framebuffer
     unsigned int fboTexture;
     glGenTextures(1, &fboTexture);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
@@ -250,8 +259,6 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
-
-    // Crea renderbuffer para la profundidad
     unsigned int rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -263,33 +270,35 @@ int main() {
     // Conecta el framebuffer a la ventana
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // Establece el callback para el cambio de tamano de la ventana.
+    glfwSetFramebufferSizeCallback(window, onResize);
+
     // Crea un quad para el framebuffer.
     // El quad es un cuadrado que se utiliza para dibujar el framebuffer flotante en la ventana.
     float quadVertices[] = {
-        // posiciones   // texCoords
-        0.6f, -0.6f,    1.0f, 0.0f,
-        1.0f, -0.6f,    0.0f, 0.0f,
-        1.0f, -1.0f,    0.0f, 1.0f,
-        0.6f, -0.6f,    1.0f, 0.0f,
-        1.0f, -1.0f,    0.0f, 1.0f,
-        0.6f, -1.0f,    1.0f, 1.0f
+        // NDC positions    // TexCoords
+         0.5f, -0.5f,       0.0f, 1.0f,   // top-left
+         1.0f, -0.5f,       1.0f, 1.0f,   // top-right
+         1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
+
+         0.5f, -0.5f,       0.0f, 1.0f,   // top-left
+         1.0f, -1.0f,       1.0f, 0.0f,   // bottom-right
+         0.5f, -1.0f,       0.0f, 0.0f    // bottom-left
     };
 
-    // Define otro VAO y VBO para el quad.
+    // Define el VAO y VBO de la camara secundaria.
     unsigned int quadVAO, quadVBO;
     glGenVertexArrays(1, &quadVAO);
     glGenBuffers(1, &quadVBO);
     glBindVertexArray(quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-
-    // Configura los atributos de los vértices del quad.
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    // Carga los shaders para el quad.
+    // Carga los shaders para el quad, de la camara secundaria.
     std::string screenVert = load("shaders/framebuffer.vert");
     std::string screenFrag = load("shaders/framebuffer.frag");
     unsigned int screenVShader = compile(screenVert.c_str(), GL_VERTEX_SHADER);
@@ -301,16 +310,23 @@ int main() {
     glDeleteShader(screenVShader);
     glDeleteShader(screenFShader);
 
-    // Establece el callback para el cambio de tamano de la ventana.
-    glfwSetFramebufferSizeCallback(window, onResize);
+    // Define el VAO y VBO de la camara primaria
+    unsigned int VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(CUBE), CUBE, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    // Carga los shaders para los objetos.
+    // Carga los shaders para los objetos, de la camara primaria.
     std::string vertexCode = load("shaders/phong-blinn.vert");
     std::string fragmentCode = load("shaders/phong-blinn.frag");
     unsigned int vertexShader = compile(vertexCode.c_str(), GL_VERTEX_SHADER);
     unsigned int fragmentShader = compile(fragmentCode.c_str(), GL_FRAGMENT_SHADER);
-
-    // Enlaza el programa con los shadres.
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -325,112 +341,99 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // Crea un VAO y un VBO, que son objetos que se utilizan para almacenar los datos de los vértices.
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    // Vincula el VBO al VAO.
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    
-    // Usar el tamaño correcto según la figura seleccionada
-    glBufferData(GL_ARRAY_BUFFER, sizeof(CUBE), CUBE, GL_STATIC_DRAW);
-
-    // Configura los atributos de los vértices.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // Antes del bucle principal:
-    float innerCutoff = glm::cos(glm::radians(25.0f));
-    float outerCutoff = glm::cos(glm::radians(35.0f));
-
     // Bucle principal de renderizado, mientras no se cierra la ventana.
     while (!glfwWindowShouldClose(window)) {
 
         // Maneja la entrada del teclado.
         onKeyPress(window);
 
-        // Limpia el buffer de color y el buffer de profundidad.
-        glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Obtiene el tiempo actual utiizando GLFW
+        float time = glfwGetTime();
 
-        // Usa el programa de shader.
-        glUseProgram(shaderProgram);
-
-        // Cámara girando alrededor del centro
-        glm::vec3 cameraPos = glm::vec3(0.0f, CAMERA_HEIGHT, CAMERA_RADIUS);
-        glm::mat4 view = glm::lookAt(cameraPos, CAMERA_TARGET, CAMERA_UP);
-        glm::mat4 projection = glm::perspective(glm::radians(FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, NEAR_PLANE, FAR_PLANE);
-
-        // Aplicar la proyección.
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-        // Aplicar la vista.
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-
-        // Define las formas a dibujar.
+        // Define los 3 modelos a dibujar.
         ShapeInfo shapes[3] = {
             {CUBE, sizeof(CUBE)/(6*sizeof(float)), glm::vec3(0.0f, 0.0f, 0.0f), CUBE_COLOR},
             {PYRAMID, sizeof(PYRAMID)/(6*sizeof(float)), glm::vec3(2.0f, 0.0f, 0.0f), PYRAMID_COLOR},
             {PRISM, sizeof(PRISM)/(6*sizeof(float)), glm::vec3(-2.0f, 0.0f, 0.0f), PRISM_COLOR}
         };
 
-        // Dibuja cada una de las formas, utilizando el VBO y el VAO.
-        for (int i = 0; i < 3; ++i) {
+        // Calcula la matriz de vista y proyección de la camara primaria
+        glUseProgram(shaderProgram);
+        glm::mat4 altView = glm::lookAt(PRIMARY_CAMERA_POS, PRIMARY_CAMERA_TARGET, PRIMARY_CAMERA_UP);
+        glm::mat4 altProj = glm::perspective(glm::radians(PRIMARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, PRIMARY_NEAR_PLANE, PRIMARY_FAR_PLANE);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(altView));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(altProj));
 
-            // Vincular el objeto al VBO en la memoria de la GPU.
+        // Cambia al framebuffer de la camara secundaria
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Renderiza los objetos con la camara secundaria, en el framebuffer
+        for (int i = 0; i < 3; ++i) {
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, shapes[i].count * 6 * sizeof(float), shapes[i].data, GL_STATIC_DRAW);
-
-            // Aplicar la transformación del objeto. Se mueve con un salto sinusoidal.
-            glm::mat4 model = glm::mat4(1.0f);
             float phase = i * 1.5f;
-            float time = glfwGetTime();
             float speed = 1.0f + 0.5f * i;
             float jump = 0.5f * fabs(sin(time * speed + phase));
-            glm::vec3 pos = shapes[i].pos + glm::vec3(0.0f, jump, 0.0f);
-            model = glm::translate(model, pos);
-
-            // Aplicar la transformación del objeto.
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), shapes[i].pos + glm::vec3(0.0f, jump, 0.0f));
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-            // La luz está en la posición de la cámara.
-            glm::vec3 lightPosView = glm::vec3(0.0f);
-            glm::vec3 lightDirView = glm::normalize(glm::vec3(view * glm::vec4(CAMERA_TARGET - cameraPos, 0.0)));
-
-            // Aplicar la posición de la luz.
-            glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPosView));
-
-            // Aplicar la dirección de la luz.
-            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(lightDirView));
-
-            // Aplicar el ángulo de corte interno y externo de la luz, que define el cono de iluminación.
-            glUniform1f(glGetUniformLocation(shaderProgram, "innerCutoff"), innerCutoff);
-            glUniform1f(glGetUniformLocation(shaderProgram, "outerCutoff"), outerCutoff);
-
-            // Aplicar el color de la luz.
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(glm::vec3(0.0f)));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(altView * glm::vec4(PRIMARY_CAMERA_TARGET - PRIMARY_CAMERA_POS, 0.0)))));
+            glUniform1f(glGetUniformLocation(shaderProgram, "innerCutoff"), INNER_CUTOFF);
+            glUniform1f(glGetUniformLocation(shaderProgram, "outerCutoff"), OUTER_CUTOFF);
             glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, glm::value_ptr(LIGHT_COLOR));
-
-            // Aplicar el color del objeto.
             glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(shapes[i].color));
-
-            // Aplicar la posición de la cámara.
-            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(cameraPos));
-
-            // Vincula el VAO, que contiene los vértices y los atributos de los vértices.
+            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(PRIMARY_CAMERA_POS));
             glBindVertexArray(VAO);
-
-            // Dibuja el objeto.
             glDrawArrays(GL_TRIANGLES, 0, shapes[i].count);
         }
 
-        // Intercambia los buffers de color y profundidad.
-        glfwSwapBuffers(window);
+        // Calcula la matriz de vista y proyección de la camara secundaria
+        glm::mat4 view = glm::lookAt(SECONDARY_CAMERA_POS, SECONDARY_CAMERA_TARGET, SECONDARY_CAMERA_UP);
+        glm::mat4 projection = glm::perspective(glm::radians(SECONDARY_FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, SECONDARY_NEAR_PLANE, SECONDARY_FAR_PLANE);
+        glUseProgram(shaderProgram);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-        // Espera a que ocurra un evento.
+        // Conecta el viewport a la camara primaria
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Renderiza los objetos con la camara primaria
+        for (int i = 0; i < 3; ++i) {
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, shapes[i].count * 6 * sizeof(float), shapes[i].data, GL_STATIC_DRAW);
+            float phase = i * 1.5f;
+            float speed = 1.0f + 0.5f * i;
+            float jump = 0.5f * fabs(sin(time * speed + phase));
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), shapes[i].pos + glm::vec3(0.0f, jump, 0.0f));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(glm::vec3(0.0f)));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightDir"), 1, glm::value_ptr(glm::normalize(glm::vec3(view * glm::vec4(SECONDARY_CAMERA_TARGET - SECONDARY_CAMERA_POS, 0.0)))));
+            glUniform1f(glGetUniformLocation(shaderProgram, "innerCutoff"), INNER_CUTOFF);
+            glUniform1f(glGetUniformLocation(shaderProgram, "outerCutoff"), OUTER_CUTOFF);
+            glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, glm::value_ptr(LIGHT_COLOR));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(shapes[i].color));
+            glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(SECONDARY_CAMERA_POS));
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, shapes[i].count);
+        }
+
+        // Dibuja el quad con la textura del framebuffer
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glUseProgram(screenShaderProgram);
+        glDisable(GL_DEPTH_TEST);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // Intercambia los buffers y actualiza la ventana
+        glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
